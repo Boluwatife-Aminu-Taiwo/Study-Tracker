@@ -1,0 +1,9 @@
+{
+    "name": "Gamma",
+    "level": "final year",
+    "courses": [
+        "Python",
+        "Reservoir Engineering"
+    ],
+    "hours_studied": 15
+}

@@ -1,0 +1,99 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import datetime
+import os
+
+FILENAME = "studytracker.csv"
+
+def save_entry(subject, hours):
+    try:
+        hours = float(hours)
+    except ValueError:
+        print("Invalid input for hours.")
+        return
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with open(FILENAME, "a") as file:
+        file.write(f"{subject},{hours},{timestamp}\n")
+
+    print("✅ Study session saved!")
+
+
+def load_entries_df():
+    if not os.path.exists(FILENAME):
+        return pd.DataFrame(columns=["subject", "hours", "timestamp"])
+
+    df = pd.read_csv(FILENAME, names=["subject", "hours", "timestamp"])
+    df["hours"] = pd.to_numeric(df["hours"], errors="coerce")
+    df.dropna(subset=["hours"], inplace=True)
+    df["subject"] = df["subject"].str.lower()
+    return df
+
+
+def show_summary(df):
+    if df.empty:
+        print("⚠️ No study data available.")
+        return
+
+    print(f"\n📊 Total study hours: {df['hours'].sum()}")
+
+    subject_totals = df.groupby("subject")["hours"].sum().sort_values(ascending=False)
+
+    print("\n📚 Study time by subject:")
+    for subject, total in subject_totals.items():
+        print(f"- {subject.capitalize()}: {total} hrs")
+
+    print(f"\n🏆 Most studied subject: {subject_totals.idxmax().capitalize()}")
+
+    print("\n🕒 Last 5 study entries:")
+    print(df.tail(5))
+
+
+def plot_summary(df):
+    if df.empty:
+        print("⚠️ No data to plot.")
+        return
+
+    subject_totals = df.groupby("subject")["hours"].sum().sort_values()
+
+    plt.figure(figsize=(8, 5))
+    subject_totals.plot(kind="barh", color="skyblue", edgecolor="black")
+    plt.title("Total Study Hours by Subject")
+    plt.xlabel("Hours")
+    plt.ylabel("Subject")
+    plt.tight_layout()
+    plt.show()
+
+
+def main():
+    while True:
+        print("\n📘 Study Tracker")
+        print("1. Log study session")
+        print("2. Show summary")
+        print("3. Plot summary")
+        print("4. Exit")
+
+        choice = input("Select an option: ").strip()
+
+        if choice == "1":
+            subject = input("Subject studied: ").strip()
+            hours = input("Hours spent: ").strip()
+            save_entry(subject, hours)
+
+        elif choice == "2":
+            df = load_entries_df()
+            show_summary(df)
+
+        elif choice == "3":
+            df = load_entries_df()
+            plot_summary(df)
+
+        elif choice == "4":
+            print("Goodbye.")
+            break
+
+        else:
+            print("❌ Invalid choice, try again.")
+
+main()

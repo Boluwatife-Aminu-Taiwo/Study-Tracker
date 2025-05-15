@@ -1,0 +1,7 @@
+Maths,4
+python,1
+maths, 3
+Python, 3
+English, 5
+Maths,4
+English,34
